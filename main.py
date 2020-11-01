@@ -70,7 +70,8 @@ def move_snake():
     # Information about game_state (empty = 0, snake = 1, snake_head = 2)
     # Information about world size? (or is this implicit from game_state?)
     # Information about direction choice, which is the label
-    # move_possible should become the error function as it tells the NN whether the direction choice was correct
+    # move_possible should become the loss function as it tells the NN whether the direction choice was correct
+    # But also score and snake length should taken into account
 
     if move_possible:
         snake.insert(0, next_move)
