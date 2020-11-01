@@ -2,6 +2,8 @@
 
 A snake game made in Pygame 2 that will be used to train a neural network AI that will eventually take control over snake.
 
+![Screenshot of Deep Snake](screenshot.png "Screenshot of Deep Snake")
+
 ## Prequisites
 
 - Python 3.8
