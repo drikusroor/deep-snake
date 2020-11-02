@@ -1,6 +1,14 @@
 import sys, pygame
 from enum import Enum
+import tensorflow as tf
+import numpy as np
+from tensorflow.keras import datasets, layers, models, Sequential
+import matplotlib.pyplot as plt
+import random
 
+BLOCK_SIZE = 20
+ROWS_AMOUNT = int(24)
+COLS_AMOUNT = int(32)
 
 class Direction(Enum):
     UP = (1,)
@@ -9,24 +17,38 @@ class Direction(Enum):
     LEFT = 4
 
 
+
+# Model
+model = Sequential(
+    [
+        layers.Dense(2, activation="relu"),
+        layers.Dense(3, activation="relu"),
+        layers.Dense(4),
+    ]
+)
+
+# Game
+
 pygame.init()
+pygame.font.init()
+font = pygame.font.SysFont('Comic Sans MS', 24)
 clock = pygame.time.Clock()
 FPS = 4
 
-size = width, height = 320, 240
+size = width, height = COLS_AMOUNT * BLOCK_SIZE, ROWS_AMOUNT * BLOCK_SIZE
 speed = [2, 2]
 black = 0, 0, 0
 
 screen = pygame.display.set_mode(size)
 
-BLOCK_SIZE = 10
 ROWS_AMOUNT = int(height / BLOCK_SIZE)
 COLS_AMOUNT = int(width / BLOCK_SIZE)
 
 game_state = [[0] * COLS_AMOUNT for i in range(ROWS_AMOUNT)]
 direction_state = Direction.LEFT
 snake = []
-
+candy = None
+turns = 0
 
 def reset_snake():
     snake.clear()
@@ -39,11 +61,57 @@ def reset_snake():
             snake.append((r_index, head_index + 3))
             snake.append((r_index, head_index + 4))
 
+def reset_candy():
+    global game_state
+    global candy
+
+    if candy != None:
+        game_state[candy[0]][candy[1]] = 0
+
+    candy_row = random.randint(0, ROWS_AMOUNT - 1)
+    candy_col = random.randint(0, COLS_AMOUNT - 1)
+
+    valid_pos = True
+    print('reset')
+
+    for segment in snake:
+        if candy_row == segment[0] and candy_col == segment[1]:
+            print('candy in snake')
+            valid_pos = False
+
+    if candy is not None and candy[0] == candy_row and candy[1] == candy_col:
+        print('same candy spot')
+        valid_pos = False
+
+
+    if valid_pos:
+        candy = (candy_row, candy_col)
+        print('valid pos -> ', candy)
+    else:
+        print('no valid pos -> reset again')
+        reset_candy()
 
 reset_snake()
+reset_candy()
+session_samples = np.array([])
 
+def append_data():
+    global game_state
+    global snake
+    global turns
+    game_map = game_state.copy()
+    for segment in snake:
+        game_map[segment[1]][segment[0]] = 1
+
+    sample = np.array([game_map, len(snake), turns])
+    sample_flat = sample.flatten()
+
+    np.append(session_samples, sample_flat)
 
 def move_snake():
+    global turns
+    global direction_state
+    global session_samples
     move_possible = True
     head = snake[0]
     if direction_state == Direction.UP:
@@ -72,15 +140,27 @@ def move_snake():
     # Information about direction choice, which is the label
     # move_possible should become the loss function as it tells the NN whether the direction choice was correct
     # But also score and snake length should taken into account
+    # append_data(game_state, snake)
 
     if move_possible:
         snake.insert(0, next_move)
-        snake.pop()
+        
+        if snake[0] == candy:
+            reset_candy()
+        else:
+            snake.pop()
+
+        turns = turns + 1
     else:
+        direction_state = Direction.LEFT
         reset_snake()
+        session_samples = 0
+        turns = 0
 
 
 def draw_blocks():
+    global candy
+    
     for r_index, row in enumerate(game_state):
         for c_index, col in enumerate(row):
             color = (0, 0, 0)
@@ -96,6 +176,14 @@ def draw_blocks():
         )
         pygame.draw.rect(screen, color, rect)
 
+    if candy is not None:
+        candy_color = (0, 255, 0)
+        rect = pygame.Rect(candy[1] * BLOCK_SIZE, candy[0] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+        pygame.draw.rect(screen, candy_color, rect)
+
+    score_text = "Turn: %s. Snake length: %s." % (turns, len(snake))
+    text_surface = font.render(score_text, False, (255, 255, 255))
+    screen.blit(text_surface, (8, 8))
 
 while 1:
     for event in pygame.event.get():
