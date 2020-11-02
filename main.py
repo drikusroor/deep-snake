@@ -72,23 +72,17 @@ def reset_candy():
     candy_col = random.randint(0, COLS_AMOUNT - 1)
 
     valid_pos = True
-    print('reset')
 
     for segment in snake:
         if candy_row == segment[0] and candy_col == segment[1]:
-            print('candy in snake')
             valid_pos = False
 
     if candy is not None and candy[0] == candy_row and candy[1] == candy_col:
-        print('same candy spot')
         valid_pos = False
-
 
     if valid_pos:
         candy = (candy_row, candy_col)
-        print('valid pos -> ', candy)
     else:
-        print('no valid pos -> reset again')
         reset_candy()
 
 reset_snake()
