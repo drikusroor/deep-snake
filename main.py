@@ -6,9 +6,9 @@ from tensorflow.keras import datasets, layers, models, Sequential
 import matplotlib.pyplot as plt
 import random
 
-BLOCK_SIZE = 20
+BLOCK_SIZE = 30
 ROWS_AMOUNT = int(24)
-COLS_AMOUNT = int(32)
+COLS_AMOUNT = int(24)
 
 class Direction(Enum):
     UP = (1,)
@@ -19,8 +19,8 @@ class Direction(Enum):
 # Model
 model = Sequential(
     [
-        layers.Dense(2, activation="relu"),
-        layers.Dense(3, activation="relu"),
+        layers.Dense(ROWS_AMOUNT * COLS_AMOUNT + 1, activation="relu"),
+        layers.Dense(ROWS_AMOUNT, activation="relu"),
         layers.Dense(4),
     ]
 )
@@ -30,7 +30,7 @@ pygame.init()
 pygame.font.init()
 font = pygame.font.SysFont('Comic Sans MS', 24)
 clock = pygame.time.Clock()
-FPS = 4
+FPS = 6
 
 size = width, height = COLS_AMOUNT * BLOCK_SIZE, ROWS_AMOUNT * BLOCK_SIZE
 speed = [2, 2]
@@ -46,6 +46,7 @@ direction_state = Direction.LEFT
 snake = []
 candy = None
 turns = 0
+score = 0
 
 def reset_snake():
     snake.clear()
@@ -101,6 +102,7 @@ def append_data():
 
 def move_snake():
     global turns
+    global score
     global direction_state
     global session_samples
     move_possible = True
@@ -142,6 +144,7 @@ def move_snake():
             snake.pop()
 
         turns = turns + 1
+        score = len(snake) * 100 - turns
     else:
         direction_state = Direction.LEFT
         reset_snake()
@@ -172,7 +175,7 @@ def draw_blocks():
         rect = pygame.Rect(candy[1] * BLOCK_SIZE, candy[0] * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
         pygame.draw.rect(screen, candy_color, rect)
 
-    score_text = "Turn: %s. Snake length: %s." % (turns, len(snake))
+    score_text = "Turn: %s. Snake length: %s. Score: %s" % (turns, len(snake), score)
     text_surface = font.render(score_text, False, (255, 255, 255))
     screen.blit(text_surface, (8, 8))
 
