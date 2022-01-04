@@ -16,8 +16,6 @@ class Direction(Enum):
     DOWN = (3,)
     LEFT = 4
 
-
-
 # Model
 model = Sequential(
     [
@@ -28,7 +26,6 @@ model = Sequential(
 )
 
 # Game
-
 pygame.init()
 pygame.font.init()
 font = pygame.font.SysFont('Comic Sans MS', 24)
