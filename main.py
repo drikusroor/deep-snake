@@ -107,6 +107,9 @@ def move_snake():
     global session_samples
     move_possible = True
     head = snake[0]
+
+    # predict here?
+
     if direction_state == Direction.UP:
         next_move = (head[0] - 1, head[1])
     elif direction_state == Direction.RIGHT:
@@ -150,6 +153,9 @@ def move_snake():
         reset_snake()
         session_samples = 0
         turns = 0
+        score = 0
+
+    # evaluate model here and learn]
 
 
 def draw_blocks():
