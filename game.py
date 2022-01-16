@@ -6,7 +6,6 @@ from enums.direction import Direction
 from models.candy import *
 from models.snake import Snake
 
-
 class Game:
 
     screen = None
@@ -120,7 +119,7 @@ class Game:
                 pygame.draw.rect(self.screen, color, rect)
 
         pygame.display.flip()
-        
+
         if RENDER_MODE == 'human':
             self.clock.tick(FPS)
 

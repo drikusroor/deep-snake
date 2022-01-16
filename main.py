@@ -2,7 +2,6 @@ import numpy as np
 import sys
 import tensorflow as tf
 from sklearn import neural_network
-import datetime
 
 # local imports
 from constants import *

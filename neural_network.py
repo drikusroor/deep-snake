@@ -1,10 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers, Sequential, initializers, optimizers
+from tensorflow.keras import layers, Sequential, optimizers
 from constants import *
 from enums.direction import *
-import pygad.kerasga
-import gym
 import matplotlib.pyplot as plt
 
 from envs.deep_snake_env import DeepSnakeEnv

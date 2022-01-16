@@ -1,9 +1,6 @@
-import pygame
-
 from enums.direction import *
 from constants import *
 from game import *
-
 
 class Snake():
 

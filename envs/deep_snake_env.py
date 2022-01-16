@@ -2,7 +2,6 @@ from gym import Env, spaces
 from constants import *
 from game import *
 
-
 class DeepSnakeEnv(Env):
 
     def __init__(self):
