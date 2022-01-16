@@ -9,8 +9,13 @@ A module which contains all constants for the snake game, it is useful to improv
 which is very important for the genetic algorithm
 """
 
-FPS = 2
+RENDER_MODE = 'human'
+FPS = 24
 BLOCK_SIZE = 30
-ROWS_AMOUNT = int(24)
-COLS_AMOUNT = int(24)
+ROWS_AMOUNT = int(20)
+COLS_AMOUNT = int(20)
 predict = True
+
+ENV = "DeepSnake-v1"
+RANDOM_SEED = 1
+N_EPISODES = 500

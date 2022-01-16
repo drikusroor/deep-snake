@@ -4,6 +4,7 @@ from enums.direction import *
 from constants import *
 from game import *
 
+
 class Snake():
 
     state = []
@@ -15,27 +16,28 @@ class Snake():
         self.state = []
         self.game = game
 
-    def move(self):
+    # not used anymore, see deep_snake_env
+    def move(self, action):
         move_possible = True
         head = self.state[0]
 
         # predict here?
-        # prediction = model.predict(
-        #     convert_game_state_to_input(game_state, snake, candy))[0]
-        # print(prediction)
+        if predict:
+            input = self.game.neural_network.convert_game_state_to_input(
+                self.game.game_state, self, self.game.candy)
+            prediction = self.game.neural_network.model.predict(input)
 
-        # if predict:
-        #     predicted_direction = np.argmax(prediction)
-        #     if predicted_direction == 0:
-        #         direction_state = Direction.UP
-        #     elif predicted_direction == 1:
-        #         direction_state = Direction.RIGHT
-        #     elif predicted_direction == 2:
-        #         direction_state = Direction.DOWN
-        #     else:
-        #         direction_state = Direction.LEFT
+            predicted_direction = np.argmax(prediction[0])
+            if predicted_direction == 0:
+                self.direction_state = Direction.UP
+            elif predicted_direction == 1:
+                self.direction_state = Direction.RIGHT
+            elif predicted_direction == 2:
+                self.direction_state = Direction.DOWN
+            else:
+                self.direction_state = Direction.LEFT
 
-        #     print(predicted_direction, direction_state)
+            print(prediction, predicted_direction, self.direction_state)
 
         if self.direction_state == Direction.UP:
             next_move = (head[0] - 1, head[1])
@@ -64,6 +66,7 @@ class Snake():
                 self.game.candy.reset()
                 self.game.score += 10
             else:
+                self.game.score += 1
                 self.state.pop()
 
         else:
@@ -74,9 +77,9 @@ class Snake():
         self.clear_state()
         self.prev_direction_state = self.direction_state
         self.direction_state = Direction.LEFT
-        
-        for r_index, row in enumerate(self.game.game_state):
-            if r_index == len(self.game.game_state) / 2:
+
+        for r_index, row in enumerate(self.game.state):
+            if r_index == len(self.game.state) / 2:
                 head_index = int((COLS_AMOUNT / 2) - 1)
                 self.state.append((r_index, head_index))
                 self.state.append((r_index, head_index + 1))
@@ -86,15 +89,3 @@ class Snake():
 
     def clear_state(self):
         self.state = []
-
-    def handle_input(self, event):
-        if event.type == pygame.KEYDOWN:
-            scancode = event.scancode
-            if scancode == 82:
-                self.direction_state = Direction.UP
-            elif scancode == 79:
-                self.direction_state = Direction.RIGHT
-            elif scancode == 81:
-                self.direction_state = Direction.DOWN
-            elif scancode == 80:
-                self.direction_state = Direction.LEFT

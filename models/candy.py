@@ -13,7 +13,7 @@ class Candy:
     def reset(self):
 
         if self.state != None:
-            self.game.game_state[self.state[0]][self.state[1]] = 0
+            self.game.state[self.state[0]][self.state[1]] = 0
 
         candy_row = random.randint(0, ROWS_AMOUNT - 1)
         candy_col = random.randint(0, COLS_AMOUNT - 1)

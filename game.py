@@ -1,15 +1,17 @@
 import pygame
 import numpy as np
 import sys
+from enums.direction import Direction
 
 from models.candy import *
 from models.snake import Snake
+
 
 class Game:
 
     screen = None
     running = False
-    game_state = []
+    state = []
     turns = 0
     score = 0
     snake = None
@@ -21,86 +23,127 @@ class Game:
 
     def __init__(self) -> None:
         pygame.init()
-        pygame.font.init()
-        self.font = pygame.font.SysFont('Comic Sans MS', 24)
-        self.game_state = [[0] * COLS_AMOUNT for i in range(ROWS_AMOUNT)]
         self.snake = Snake(self)
         self.candy = Candy(self)
-        self.turns = 0
-        self.score = 0
-        self.snake.reset()
-        self.candy.reset()
-        self.screen = pygame.display.set_mode(self.size)
+        self.reset_state()
+
+    def generate_empty_state(self):
+        state = np.array([[0] * COLS_AMOUNT for i in range(ROWS_AMOUNT)])
+        return state
+
+    def reset_state(self):
+        if RENDER_MODE == 'human':
+            self.screen = pygame.display.set_mode(self.size)
+        self.state = self.generate_empty_state()
 
     def start(self):
+        pass
 
-        self.running = True
+    def step(self, action):
+        move_possible = True
+        reward = 0
+        done = False
+        head = self.snake.state[0]
+        predicted_direction = action
 
-        while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
+        if predicted_direction == 0:
+            self.snake.direction_state = Direction.UP
+        elif predicted_direction == 1:
+            self.snake.direction_state = Direction.RIGHT
+        elif predicted_direction == 2:
+            self.snake.direction_state = Direction.DOWN
+        else:
+            self.snake.direction_state = Direction.LEFT
 
-                self.snake.handle_input(event)
+        if self.snake.direction_state == Direction.UP:
+            next_move = (head[0] - 1, head[1])
+        elif self.snake.direction_state == Direction.RIGHT:
+            next_move = (head[0], head[1] + 1)
+        elif self.snake.direction_state == Direction.DOWN:
+            next_move = (head[0] + 1, head[1])
+        else:
+            next_move = (head[0], head[1] - 1)
 
-            # reset view
-            self.screen.fill(self.black)
-            self.snake.move()
-            self.turns += 1
-            
-            self.draw_blocks()
-            pygame.display.flip()
-            self.clock.tick(FPS)
-            self.generate_data()
+        for segment in self.snake.state:
+            if segment[0] == next_move[0] and segment[1] == next_move[1]:
+                move_possible = False
+            elif (
+                next_move[0] < 0
+                or next_move[0] > ROWS_AMOUNT - 1
+                or next_move[1] < 0
+                or next_move[1] > COLS_AMOUNT - 1
+            ):
+                move_possible = False
 
-    def stop(self):
-        self.running = False
+        if move_possible:
+            self.snake.state.insert(0, next_move)
 
-    def reset_game(self):
+            if self.snake.state[0] == self.candy.state:
+                self.candy.reset()
+                reward = 10
+            else:
+                reward = .1
+                self.snake.state.pop()
+        else:
+            done = True
+            reward = -1
+
+        self.state = self.generate_state()
+        state = self.state  # self.flatten_state()
+        info = {"state": state, "reward": reward, "done": done,
+                "turns": self.turns, "score": self.score}
+
+        return state, reward, done, info
+
+    def reset(self):
+        self.reset_state()
         self.snake.reset()
+        self.candy.reset()
+        self.state = self.generate_state()
+        return self.state
 
-    def draw_blocks(self):
-
-        for r_index, row in enumerate(self.game_state):
+    def render(self):
+        for r_index, row in enumerate(self.state):
             for c_index, col in enumerate(row):
                 color = (0, 0, 0)
+
+                if col == 1:
+                    color = (255, 0, 0)  # red
+                elif col == 2:
+                    color = (0, 255, 0)  # green
+                elif col == 3:
+                    color = (0, 0, 255)  # candy
+
                 rect = pygame.Rect(
                     c_index * BLOCK_SIZE, r_index * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
                 )
                 pygame.draw.rect(self.screen, color, rect)
 
-        for segment in self.snake.state:
-            color = (255, 0, 0)
-            rect = pygame.Rect(
-                segment[1] * BLOCK_SIZE, segment[0] *
-                BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
-            )
-            pygame.draw.rect(self.screen, color, rect)
+        pygame.display.flip()
+        
+        if RENDER_MODE == 'human':
+            self.clock.tick(FPS)
 
-        if self.candy and self.candy.state is not None:
-            candy_color = (0, 255, 0)
-            rect = pygame.Rect(self.candy.state[1] * BLOCK_SIZE, self.candy.state[0]
-                            * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
-            pygame.draw.rect(self.screen, candy_color, rect)
+    def generate_state(self):
+        state = self.generate_empty_state()
 
-        score_text = "Turn: %s. Snake length: %s. Score: %s" % (
-            self.turns, len(self.snake.state), self.score)
-        text_surface = self.font.render(score_text, False, (255, 255, 255))
-        self.screen.blit(text_surface, (8, 8))
-
-
-    def generate_data(self):
-        # Create data sample and label here and send it to train model
-        # Information about game_state (empty = 0, snake = 1, snake_head = 2)
-        # Information about world size? (or is this implicit from game_state?)
-        # Information about direction choice, which is the label
-        # Score should be the loss function
-
-        game_data = np.array(self.game_state)
-        for i, segment in enumerate(self.snake.state):
-            if i == 0:
-                game_data[segment[1]][segment[0]] = 2
+        for s, segment in enumerate(self.snake.state):
+            if s == 0:
+                state[segment[1]][segment[0]] = 2
             else:
-                game_data[segment[1]][segment[0]] = 1
+                state[segment[1]][segment[0]] = 1
 
-        game_data[self.candy.state[1]][self.candy.state[0]] = 4
+        candy_y = self.candy.state[1]
+        candy_x = self.candy.state[0]
+
+        state[candy_y][candy_x] = 3
+
+        return state
+
+    def flatten_state(self):
+        np_state = np.array(self.state)
+        return np.array([np_state.flatten()])
+
+    def close(self):
+        pygame.quit()
+        sys.exit()
