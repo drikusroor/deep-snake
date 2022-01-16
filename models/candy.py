@@ -2,6 +2,7 @@ import random
 
 from constants import *
 
+
 class Candy:
 
     state = None
@@ -15,8 +16,8 @@ class Candy:
         if self.state != None:
             self.game.state[self.state[0]][self.state[1]] = 0
 
-        candy_row = random.randint(0, ROWS_AMOUNT - 1)
-        candy_col = random.randint(0, COLS_AMOUNT - 1)
+        candy_row = random.randint(1, ROWS_AMOUNT - 2)
+        candy_col = random.randint(1, COLS_AMOUNT - 2)
 
         valid_pos = True
 

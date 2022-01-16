@@ -2,11 +2,13 @@ import pygame
 import numpy as np
 import sys
 from enums.direction import Direction
+from enums.game_entity import GameEntity
 
 from models.candy import *
 from models.snake import Snake
 
-class Game:
+
+class DeepSnakeGame:
 
     screen = None
     running = False
@@ -28,11 +30,16 @@ class Game:
 
     def generate_empty_state(self):
         state = np.array([[0] * COLS_AMOUNT for i in range(ROWS_AMOUNT)])
+        state[0] = np.array([-1] * COLS_AMOUNT)
+        state[ROWS_AMOUNT - 1] = np.array([-1] * COLS_AMOUNT)
+
+        for i in range(ROWS_AMOUNT):
+            state[i][0] = -1
+            state[i][COLS_AMOUNT - 1] = -1
+
         return state
 
     def reset_state(self):
-        if RENDER_MODE == 'human':
-            self.screen = pygame.display.set_mode(self.size)
         self.state = self.generate_empty_state()
 
     def start(self):
@@ -66,13 +73,15 @@ class Game:
         for segment in self.snake.state:
             if segment[0] == next_move[0] and segment[1] == next_move[1]:
                 move_possible = False
-            elif (
-                next_move[0] < 0
-                or next_move[0] > ROWS_AMOUNT - 1
-                or next_move[1] < 0
-                or next_move[1] > COLS_AMOUNT - 1
-            ):
-                move_possible = False
+
+        if (
+            self.state[next_move[0]][next_move[1]] == -1
+            or next_move[0] < 0
+            or next_move[0] > ROWS_AMOUNT - 1
+            or next_move[1] < 0
+            or next_move[1] > COLS_AMOUNT - 1
+        ):
+            move_possible = False
 
         if move_possible:
             self.snake.state.insert(0, next_move)
@@ -81,7 +90,7 @@ class Game:
                 self.candy.reset()
                 reward = 10
             else:
-                reward = .1
+                reward = 0
                 self.snake.state.pop()
         else:
             done = True
@@ -99,6 +108,8 @@ class Game:
         self.snake.reset()
         self.candy.reset()
         self.state = self.generate_state()
+        if RENDER_MODE == 'human':
+            self.screen = pygame.display.set_mode(self.size)
         return self.state
 
     def render(self):
@@ -106,12 +117,12 @@ class Game:
             for c_index, col in enumerate(row):
                 color = (0, 0, 0)
 
-                if col == 1:
-                    color = (255, 0, 0)  # red
+                if col == -1:
+                    color = (127, 0, 0)  # border / tail red
+                elif col == 1:
+                    color = (0, 0, 127)  # head / green
                 elif col == 2:
-                    color = (0, 255, 0)  # green
-                elif col == 3:
-                    color = (0, 0, 255)  # candy
+                    color = (0, 127, 0)  # candy / green
 
                 rect = pygame.Rect(
                     c_index * BLOCK_SIZE, r_index * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
@@ -128,14 +139,14 @@ class Game:
 
         for s, segment in enumerate(self.snake.state):
             if s == 0:
-                state[segment[1]][segment[0]] = 2
+                state[segment[1]][segment[0]] = GameEntity.SNAKE_HEAD.value
             else:
-                state[segment[1]][segment[0]] = 1
+                state[segment[1]][segment[0]] = GameEntity.FORBIDDEN.value
 
         candy_y = self.candy.state[1]
         candy_x = self.candy.state[0]
 
-        state[candy_y][candy_x] = 3
+        state[candy_y][candy_x] = GameEntity.CANDY.value
 
         return state
 

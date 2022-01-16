@@ -12,7 +12,7 @@ from envs.deep_snake_env import DeepSnakeEnv
 args = sys.argv
 # should_train = args[0] == "should_train"
 
-should_train = False
+should_train = True
 should_display = True
 
 # random seed (reproduciblity)
@@ -25,9 +25,9 @@ env.seed(RANDOM_SEED)
 
 env.reset()  # reset to env
 
-model_name = 'model.v2.h5'
+model_name = 'trained_models/model.v3.h5'
 
-neural_network = NeuralNetwork(env, model_name)  # import model
+neural_network = NeuralNetwork(env)  # import model
 
 neural_network.train(episodes=N_EPISODES)  # train model
 if should_train:

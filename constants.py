@@ -10,10 +10,10 @@ which is very important for the genetic algorithm
 """
 
 RENDER_MODE = 'human'
-FPS = 24
+FPS = 30
 BLOCK_SIZE = 30
-ROWS_AMOUNT = int(20)
-COLS_AMOUNT = int(20)
+ROWS_AMOUNT = int(16)
+COLS_AMOUNT = int(16)
 predict = True
 
 ENV = "DeepSnake-v1"
