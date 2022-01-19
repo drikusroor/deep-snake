@@ -52,6 +52,8 @@ class DeepSnakeGame:
         head = self.snake.state[0]
         predicted_direction = action
 
+        self.snake.prev_direction_state = self.snake.direction_state
+
         if predicted_direction == 0:
             self.snake.direction_state = Direction.UP
         elif predicted_direction == 1:
