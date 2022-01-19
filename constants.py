@@ -10,7 +10,7 @@ which is very important for the genetic algorithm
 """
 
 RENDER_MODE = 'human'
-FPS = 30
+FPS = 24
 BLOCK_SIZE = 30
 ROWS_AMOUNT = int(16)
 COLS_AMOUNT = int(16)
