@@ -1,6 +1,8 @@
 import pygame
 import numpy as np
 import sys
+
+from sklearn.metrics import euclidean_distances
 from enums.action import Action
 from enums.direction import Direction
 from enums.game_entity import GameEntity
@@ -22,6 +24,7 @@ class DeepSnakeGame:
     size = width, height = COLS_AMOUNT * BLOCK_SIZE, ROWS_AMOUNT * BLOCK_SIZE
     clock = pygame.time.Clock()
     font = None
+    prev_euclidean_distance_to_candy = 1
 
     def __init__(self) -> None:
         pygame.init()
@@ -54,6 +57,7 @@ class DeepSnakeGame:
         predicted_direction = action
 
         self.snake.prev_direction_state = self.snake.direction_state
+        self.prev_euclidean_distance_to_candy = self.get_euclidean_distance_to_candy()
 
         if predicted_direction == 0:
             self.snake.direction_state = self.snake.turn(action)
@@ -86,7 +90,7 @@ class DeepSnakeGame:
         if move_possible:
             self.snake.state.insert(0, next_move)
 
-            reward += 1
+            reward += .1
 
             if self.snake.state[0] == self.candy.state:
                 self.candy.reset()
@@ -157,12 +161,14 @@ class DeepSnakeGame:
             GameEntity.FORBIDDEN.value)
         snake_vision_candy = self.get_proximities_to_type(
             GameEntity.CANDY.value)
+        euclidean_distances = self.get_euclidean_distances_to_candy()
         snake_direction = self.get_snake_direction_hot_encoded()
 
         return np.concatenate([
             snake_vision_forbidden,
             snake_vision_candy,
-            snake_direction
+            snake_direction,
+            euclidean_distances
         ])
 
     def get_proximities_to_type(self, game_entity=GameEntity.FORBIDDEN.value):
@@ -209,6 +215,21 @@ class DeepSnakeGame:
             1 if self.snake.direction_state == Direction.DOWN else 0,
             1 if self.snake.direction_state == Direction.LEFT else 0,
         ])
+
+    def get_euclidean_distances_to_candy(self):
+        prev_euclidean_distance_to_candy = self.prev_euclidean_distance_to_candy
+        euclidean_distance_to_candy = self.get_euclidean_distance_to_candy()
+
+        return np.array([
+            prev_euclidean_distance_to_candy,
+            euclidean_distance_to_candy
+        ])
+
+    def get_euclidean_distance_to_candy(self):
+        snake_head_state = np.array(self.snake.state[0])
+        candy_state = np.array(self.candy.state)
+
+        return np.linalg.norm(candy_state - snake_head_state) / (COLS_AMOUNT + ROWS_AMOUNT)
 
     def close(self):
         pygame.quit()

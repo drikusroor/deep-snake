@@ -163,7 +163,7 @@ class NeuralNetwork:
                 # if episode%render_n==0: ## render env to visualize.
                 if RENDER_MODE == 'human':
                     env.render()
-                if done:
+                if done or steps == 100:
                     # update policy
                     if episode % rollout_n == 0:
                         print('Episode: %d, Reward: %d, Steps: %d' %
