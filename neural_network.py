@@ -151,7 +151,7 @@ class NeuralNetwork:
             episode_reward = 0  # record episode reward
             steps = 0
 
-            while not done and steps < 100:
+            while not done and steps < MAX_TURNS:
                 # play an action and record the game state & reward per episode
                 steps += 1
                 action, prob = self.get_action(state)
@@ -163,7 +163,7 @@ class NeuralNetwork:
                 # if episode%render_n==0: ## render env to visualize.
                 if RENDER_MODE == 'human':
                     env.render()
-                if done or steps == 100:
+                if done or steps == MAX_TURNS:
                     # update policy
                     if episode % rollout_n == 0:
                         print('Episode: %d, Reward: %d, Steps: %d' %
