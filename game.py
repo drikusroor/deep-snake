@@ -84,10 +84,9 @@ class DeepSnakeGame:
         if move_possible:
             self.snake.state.insert(0, next_move)
 
-            reward += 1
-
             if self.snake.state[0] == self.candy.state:
                 self.candy.reset()
+                reward += 1
             else:
                 self.snake.state.pop()
 
@@ -152,10 +151,13 @@ class DeepSnakeGame:
     def get_observation(self):
         snake_vision_forbidden = self.get_snake_vision(
             2, GameEntity.FORBIDDEN.value)
+        snake_vision_candy = self.get_snake_vision(
+            2, GameEntity.CANDY.value)
         snake_direction = self.get_snake_direction()
 
         return np.concatenate([
             snake_vision_forbidden,
+            snake_vision_candy,
             snake_direction
         ])
 

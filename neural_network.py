@@ -151,7 +151,7 @@ class NeuralNetwork:
             episode_reward = 0  # record episode reward
             steps = 0
 
-            while not done:
+            while not done and steps < 100:
                 # play an action and record the game state & reward per episode
                 steps += 1
                 action, prob = self.get_action(state)
