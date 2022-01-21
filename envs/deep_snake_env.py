@@ -8,7 +8,7 @@ class DeepSnakeEnv(Env):
     def __init__(self):
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
-            low=0, high=4, shape=(ROWS_AMOUNT, COLS_AMOUNT), dtype=np.uint8)
+            low=-1, high=2, shape=(ROWS_AMOUNT, COLS_AMOUNT), dtype=np.uint8)
         self.game = DeepSnakeGame()
 
     def step(self, action):

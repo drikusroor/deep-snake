@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+
 from constants import *
 
 
@@ -32,3 +34,9 @@ class Candy:
             self.state = (candy_row, candy_col)
         else:
             self.reset()
+
+    def get_normalized_coordinates(self):
+        return np.array((
+            self.state[0] / (ROWS_AMOUNT - 2),
+            self.state[1] / (COLS_AMOUNT - 2),
+        ))

@@ -12,10 +12,11 @@ which is very important for the genetic algorithm
 RENDER_MODE = 'human'
 FPS = 24
 BLOCK_SIZE = 30
-ROWS_AMOUNT = int(16)
-COLS_AMOUNT = int(16)
+ROWS_AMOUNT = int(12)
+COLS_AMOUNT = int(12)
+observation_shape = 16
 predict = True
 
 ENV = "DeepSnake-v1"
 RANDOM_SEED = 1
-N_EPISODES = 500
+N_EPISODES = 1500

@@ -16,7 +16,7 @@ class NeuralNetwork:
 
         self.state_shape = env.observation_space.shape  # the state space
         self.action_shape = env.action_space.n  # the action space
-        self.gamma = 0.99  # decay rate of past observations
+        self.gamma = 0.9  # decay rate of past observations
         self.alpha = 1e-4  # learning rate in the policy gradient
         self.learning_rate = 0.01  # learning rate in deep learning
 
@@ -38,16 +38,20 @@ class NeuralNetwork:
         model = Sequential()
 
         # input shape is of observations
-        model.add(layers.Dense(ROWS_AMOUNT * COLS_AMOUNT,
-                  input_shape=(ROWS_AMOUNT * COLS_AMOUNT,), activation="relu"))
+        # model.add(layers.CategoryEncoding(num_tokens=4)),
+        model.add(layers.Dense(observation_shape,
+                  input_shape=(observation_shape,), activation="relu"))
         # add a relu layer
-        model.add(layers.Dense(ROWS_AMOUNT, activation="relu"))
+        model.add(layers.Dense(observation_shape, activation="relu"))
+        model.add(layers.Dense(observation_shape * 2, activation="relu"))
 
         # output shape is according to the number of action
         # The softmax function outputs a probability distribution over the actions
         model.add(layers.Dense(4, activation="softmax"))
         model.compile(loss="categorical_crossentropy",
                       optimizer=optimizers.Adam(lr=self.learning_rate))
+
+        model.build((None, ROWS_AMOUNT * COLS_AMOUNT))
 
         print(model.summary())
 
@@ -74,18 +78,11 @@ class NeuralNetwork:
         of the actions'''
 
         # transform state
-        # state
         state = state.reshape(1, -1)
         # get action probably
-
         action_probability_distribution = self.model.predict(
-            state, batch_size=1)
+            state, batch_size=1).flatten()
         # norm action probability distribution
-        action_probability_distribution = np.average(
-            action_probability_distribution, axis=0)
-
-        action_probability_distribution /= np.sum(
-            action_probability_distribution)
 
         # sample action
         action = np.random.choice(a=self.action_shape, size=1,
@@ -119,7 +116,7 @@ class NeuralNetwork:
         \delta \theta = \alpha * gradient + log pi'''
 
         # get X
-        states = np.array(self.states).reshape(-1, ROWS_AMOUNT * COLS_AMOUNT)
+        states = np.array(self.states).reshape(-1, observation_shape)
 
         # get Y
         gradients = np.vstack(self.gradients)
@@ -149,7 +146,8 @@ class NeuralNetwork:
 
         for episode in range(episodes):
             # each episode is a new game env
-            state = env.reset()
+            env.reset()
+            state = env.game.get_observation()
             done = False
             episode_reward = 0  # record episode reward
             steps = 0
@@ -185,7 +183,7 @@ class NeuralNetwork:
         plt.plot(self.episodes, self.total_rewards)
         plt.plot(self.episodes, self.total_steps, '-.')
         plt.xlabel('Episodes')
-        plt.ylabel('Total Reward (-) / Total Steps (-.)')
+        plt.ylabel('Total Reward (-)')
         plt.show()
 
     def save_model(self, path):

@@ -30,12 +30,13 @@ class DeepSnakeGame:
 
     def generate_empty_state(self):
         state = np.array([[0] * COLS_AMOUNT for i in range(ROWS_AMOUNT)])
-        state[0] = np.array([-1] * COLS_AMOUNT)
-        state[ROWS_AMOUNT - 1] = np.array([-1] * COLS_AMOUNT)
+        state[0] = np.array([GameEntity.FORBIDDEN.value] * COLS_AMOUNT)
+        state[ROWS_AMOUNT -
+              1] = np.array([GameEntity.FORBIDDEN.value] * COLS_AMOUNT)
 
         for i in range(ROWS_AMOUNT):
-            state[i][0] = -1
-            state[i][COLS_AMOUNT - 1] = -1
+            state[i][0] = GameEntity.FORBIDDEN.value
+            state[i][COLS_AMOUNT - 1] = GameEntity.FORBIDDEN.value
 
         return state
 
@@ -77,7 +78,8 @@ class DeepSnakeGame:
                 move_possible = False
 
         if (
-            self.state[next_move[0]][next_move[1]] == -1
+            self.state[next_move[0]][next_move[1]
+                                     ] == GameEntity.FORBIDDEN.value
             or next_move[0] < 0
             or next_move[0] > ROWS_AMOUNT - 1
             or next_move[1] < 0
@@ -88,18 +90,23 @@ class DeepSnakeGame:
         if move_possible:
             self.snake.state.insert(0, next_move)
 
+            # if self.snake.prev_direction_state != self.snake.direction_state:
+            #     reward += .5
+
+            reward += 1
+
             if self.snake.state[0] == self.candy.state:
                 self.candy.reset()
-                reward = 10
+                # reward += 1
             else:
-                reward = 0
                 self.snake.state.pop()
+
         else:
+            reward -= 2
             done = True
-            reward = -1
 
         self.state = self.generate_state()
-        state = self.state  # self.flatten_state()
+        state = self.get_observation()
         info = {"state": state, "reward": reward, "done": done,
                 "turns": self.turns, "score": self.score}
 
@@ -119,11 +126,11 @@ class DeepSnakeGame:
             for c_index, col in enumerate(row):
                 color = (0, 0, 0)
 
-                if col == -1:
+                if col == GameEntity.FORBIDDEN.value:
                     color = (127, 0, 0)  # border / tail red
-                elif col == 1:
+                elif col == GameEntity.SNAKE_HEAD.value:
                     color = (0, 0, 127)  # head / green
-                elif col == 2:
+                elif col == GameEntity.CANDY.value:
                     color = (0, 127, 0)  # candy / green
 
                 rect = pygame.Rect(
@@ -152,9 +159,35 @@ class DeepSnakeGame:
 
         return state
 
-    def flatten_state(self):
-        np_state = np.array(self.state)
-        return np.array([np_state.flatten()])
+    def get_observation(self):
+        snake_vision_forbidden = self.get_snake_vision(
+            1, GameEntity.FORBIDDEN.value)
+        snake_vision_candy = self.get_snake_vision(1, GameEntity.CANDY.value)
+
+        return np.concatenate([
+            snake_vision_forbidden,
+            snake_vision_candy,
+        ])
+
+    def get_snake_vision(self, vision_size=3, game_entity=GameEntity.FORBIDDEN.value):
+        snake_head_state = np.array(self.snake.state[0])
+        vision = []
+        for s_y in range(-vision_size, vision_size + 1):
+            for s_x in range(-vision_size, vision_size + 1):
+                y = np.clip([snake_head_state[1] + s_y], 0, ROWS_AMOUNT - 1)
+                x = np.clip([snake_head_state[0] + s_x], 0, COLS_AMOUNT - 1)
+
+                point = 0
+
+                if self.state[y, x] == game_entity:
+                    point = 1
+
+                if s_y != 0 or s_x != 0:
+                    vision.append(point)
+
+        vision = np.array(vision)
+
+        return vision
 
     def close(self):
         pygame.quit()
