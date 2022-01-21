@@ -14,7 +14,7 @@ FPS = 24
 BLOCK_SIZE = 30
 ROWS_AMOUNT = int(12)
 COLS_AMOUNT = int(12)
-observation_shape = 52
+observation_shape = 10
 predict = True
 
 ENV = "DeepSnake-v1"

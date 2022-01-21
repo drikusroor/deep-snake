@@ -84,14 +84,16 @@ class DeepSnakeGame:
         if move_possible:
             self.snake.state.insert(0, next_move)
 
+            reward += 1
+
             if self.snake.state[0] == self.candy.state:
                 self.candy.reset()
-                reward += 1
+                reward += 100
             else:
                 self.snake.state.pop()
 
         else:
-            reward -= 1
+            reward -= 10
             done = True
 
         self.state = self.generate_state()
@@ -149,11 +151,11 @@ class DeepSnakeGame:
         return state
 
     def get_observation(self):
-        snake_vision_forbidden = self.get_snake_vision(
-            2, GameEntity.FORBIDDEN.value)
-        snake_vision_candy = self.get_snake_vision(
-            2, GameEntity.CANDY.value)
-        snake_direction = self.get_snake_direction()
+        snake_vision_forbidden = self.get_proximities_to_type(
+            GameEntity.FORBIDDEN.value)
+        snake_vision_candy = self.get_proximities_to_type(
+            GameEntity.CANDY.value)
+        snake_direction = self.get_snake_direction_hot_encoded()
 
         return np.concatenate([
             snake_vision_forbidden,
@@ -161,7 +163,8 @@ class DeepSnakeGame:
             snake_direction
         ])
 
-    def get_snake_vision(self, vision_size=3, game_entity=GameEntity.FORBIDDEN.value):
+    # deprecated
+    def get_snake_vision(self, vision_size=5, game_entity=GameEntity.FORBIDDEN.value):
         snake_head_state = np.array(self.snake.state[0])
         vision = []
         for s_y in range(-vision_size, vision_size + 1):
@@ -181,7 +184,42 @@ class DeepSnakeGame:
 
         return vision
 
-    def get_snake_direction(self):
+    def get_proximities_to_type(self, game_entity=GameEntity.FORBIDDEN.value):
+        snake_direction = self.snake.direction_state
+
+        left = self.get_proximity_to_type(game_entity, snake_direction.get_left())
+        forward = self.get_proximity_to_type(game_entity, snake_direction)
+        right = self.get_proximity_to_type(game_entity, snake_direction.get_right())
+
+        proximities = np.array([left, forward, right])
+
+        return proximities
+
+    def get_proximity_to_type(self, game_entity: GameEntity, snake_direction: Direction):
+        snake_head_state = np.array(self.snake.state[0])
+        vector = snake_direction.get_vector()
+        stepper = vector
+        distance = 1
+        found = False
+        steps = COLS_AMOUNT
+
+        while steps > 0:
+            adjacent_tile = snake_head_state + stepper
+            adjacent_tile[0] = np.clip(adjacent_tile[0], 0, COLS_AMOUNT - 1)
+            adjacent_tile[1] = np.clip(adjacent_tile[1], 0, ROWS_AMOUNT - 1)
+
+            adjacent_tile_value = self.state[adjacent_tile[1], adjacent_tile[0]]
+
+            if adjacent_tile_value == game_entity:
+                break
+            else:
+                distance += 1
+                stepper += vector
+                steps -= 1
+
+        return 1 / distance
+
+    def get_snake_direction_hot_encoded(self):
         return np.array([
             1 if self.snake.direction_state == Direction.UP else 0,
             1 if self.snake.direction_state == Direction.RIGHT else 0,
