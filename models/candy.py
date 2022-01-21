@@ -24,19 +24,13 @@ class Candy:
         valid_pos = True
 
         for segment in self.game.snake.state:
-            if candy_row == segment[0] and candy_col == segment[1]:
+            if candy_col == segment[0] and candy_row == segment[1]:
                 valid_pos = False
 
-        if self.state is not None and self.state[0] == candy_row and self.state[1] == candy_col:
+        if self.state is not None and self.state[0] == candy_col and self.state[1] == candy_row:
             valid_pos = False
 
         if valid_pos:
-            self.state = (candy_row, candy_col)
+            self.state = (candy_col, candy_row)
         else:
             self.reset()
-
-    def get_normalized_coordinates(self):
-        return np.array((
-            self.state[0] / (ROWS_AMOUNT - 2),
-            self.state[1] / (COLS_AMOUNT - 2),
-        ))

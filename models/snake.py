@@ -5,6 +5,7 @@ from enums.direction import *
 from constants import *
 from enums.game_entity import GameEntity
 
+
 class Snake():
 
     state = []
@@ -37,8 +38,8 @@ class Snake():
         initial_direction = np.random.choice(
             [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT])
 
-        random_x = np.random.choice(range(0, ROWS_AMOUNT))
-        random_y = np.random.choice(range(0, COLS_AMOUNT))
+        random_x = np.random.choice(range(0, COLS_AMOUNT))
+        random_y = np.random.choice(range(0, ROWS_AMOUNT))
 
         spawn_point = [(random_x, random_y)]
 
@@ -62,21 +63,14 @@ class Snake():
 
     def check_spawn_point_validity(self, spawn_point) -> bool:
         for segment in spawn_point:
-            if segment[0] < 0 or segment[0] > ROWS_AMOUNT - 1:
+            if segment[0] < 0 or segment[0] > COLS_AMOUNT - 1:
                 return False
-            elif segment[1] < 0 or segment[1] > COLS_AMOUNT - 1:
+            elif segment[1] < 0 or segment[1] > ROWS_AMOUNT - 1:
                 return False
             game_state_segment = self.game.state[segment[0]][segment[1]]
             if game_state_segment != GameEntity.EMPTY.value:
                 return False
         return True
-
-    def get_normalized_coordinates(self) -> np.ndarray:
-        normalized_coordinates = []
-        for segment in self.state:
-            normalized_coordinates.append(
-                [segment[0] / (ROWS_AMOUNT - 1), segment[1] / (COLS_AMOUNT - 1)])
-        return np.array(normalized_coordinates)
 
     def turn(self, action: Action) -> Direction:
         if action == Action.LEFT:

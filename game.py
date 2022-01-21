@@ -30,14 +30,16 @@ class DeepSnakeGame:
         self.reset_state()
 
     def generate_empty_state(self):
-        state = np.array([[0] * COLS_AMOUNT for i in range(ROWS_AMOUNT)])
-        state[0] = np.array([GameEntity.FORBIDDEN.value] * COLS_AMOUNT)
+
+        state = np.array([[0] * ROWS_AMOUNT for i in range(COLS_AMOUNT)])
+
+        state[0] = np.array([GameEntity.FORBIDDEN.value] * ROWS_AMOUNT)
         state[ROWS_AMOUNT -
               1] = np.array([GameEntity.FORBIDDEN.value] * COLS_AMOUNT)
 
         for i in range(ROWS_AMOUNT):
             state[i][0] = GameEntity.FORBIDDEN.value
-            state[i][COLS_AMOUNT - 1] = GameEntity.FORBIDDEN.value
+            state[i][ROWS_AMOUNT - 1] = GameEntity.FORBIDDEN.value
 
         return state
 
@@ -75,9 +77,9 @@ class DeepSnakeGame:
             self.state[next_move[0]][next_move[1]
                                      ] == GameEntity.FORBIDDEN.value
             or next_move[0] < 0
-            or next_move[0] > ROWS_AMOUNT - 1
+            or next_move[0] > COLS_AMOUNT - 1
             or next_move[1] < 0
-            or next_move[1] > COLS_AMOUNT - 1
+            or next_move[1] > ROWS_AMOUNT - 1
         ):
             move_possible = False
 
@@ -125,7 +127,7 @@ class DeepSnakeGame:
                     color = (0, 127, 0)  # candy / green
 
                 rect = pygame.Rect(
-                    c_index * BLOCK_SIZE, r_index * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
+                    r_index * BLOCK_SIZE, c_index * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE
                 )
                 pygame.draw.rect(self.screen, color, rect)
 
@@ -139,12 +141,12 @@ class DeepSnakeGame:
 
         for s, segment in enumerate(self.snake.state):
             if s == 0:
-                state[segment[1]][segment[0]] = GameEntity.SNAKE_HEAD.value
+                state[segment[0]][segment[1]] = GameEntity.SNAKE_HEAD.value
             else:
-                state[segment[1]][segment[0]] = GameEntity.FORBIDDEN.value
+                state[segment[0]][segment[1]] = GameEntity.FORBIDDEN.value
 
-        candy_y = self.candy.state[1]
-        candy_x = self.candy.state[0]
+        candy_y = self.candy.state[0]
+        candy_x = self.candy.state[1]
 
         state[candy_y][candy_x] = GameEntity.CANDY.value
 
@@ -187,9 +189,11 @@ class DeepSnakeGame:
     def get_proximities_to_type(self, game_entity=GameEntity.FORBIDDEN.value):
         snake_direction = self.snake.direction_state
 
-        left = self.get_proximity_to_type(game_entity, snake_direction.get_left())
+        left = self.get_proximity_to_type(
+            game_entity, snake_direction.get_left())
         forward = self.get_proximity_to_type(game_entity, snake_direction)
-        right = self.get_proximity_to_type(game_entity, snake_direction.get_right())
+        right = self.get_proximity_to_type(
+            game_entity, snake_direction.get_right())
 
         proximities = np.array([left, forward, right])
 
@@ -200,7 +204,6 @@ class DeepSnakeGame:
         vector = snake_direction.get_vector()
         stepper = vector
         distance = 1
-        found = False
         steps = COLS_AMOUNT
 
         while steps > 0:
@@ -208,7 +211,8 @@ class DeepSnakeGame:
             adjacent_tile[0] = np.clip(adjacent_tile[0], 0, COLS_AMOUNT - 1)
             adjacent_tile[1] = np.clip(adjacent_tile[1], 0, ROWS_AMOUNT - 1)
 
-            adjacent_tile_value = self.state[adjacent_tile[1], adjacent_tile[0]]
+            adjacent_tile_value = self.state[adjacent_tile[0],
+                                             adjacent_tile[1]]
 
             if adjacent_tile_value == game_entity:
                 break
