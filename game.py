@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import sys
+from enums.action import Action
 from enums.direction import Direction
 from enums.game_entity import GameEntity
 
@@ -43,7 +44,7 @@ class DeepSnakeGame:
     def reset_state(self):
         self.state = self.generate_empty_state()
 
-    def step(self, action):
+    def step(self, action: Action):
         move_possible = True
         reward = 0
         done = False
@@ -53,13 +54,9 @@ class DeepSnakeGame:
         self.snake.prev_direction_state = self.snake.direction_state
 
         if predicted_direction == 0:
-            self.snake.direction_state = Direction.UP
+            self.snake.direction_state = self.snake.turn(action)
         elif predicted_direction == 1:
-            self.snake.direction_state = Direction.RIGHT
-        elif predicted_direction == 2:
-            self.snake.direction_state = Direction.DOWN
-        else:
-            self.snake.direction_state = Direction.LEFT
+            self.snake.direction_state = self.snake.turn(action)
 
         if self.snake.direction_state == Direction.UP:
             next_move = (head[0] - 1, head[1])
@@ -87,14 +84,10 @@ class DeepSnakeGame:
         if move_possible:
             self.snake.state.insert(0, next_move)
 
-            # if self.snake.prev_direction_state != self.snake.direction_state:
-            #     reward += .5
-
             reward += 1
 
             if self.snake.state[0] == self.candy.state:
                 self.candy.reset()
-                # reward += 1
             else:
                 self.snake.state.pop()
 
@@ -159,7 +152,7 @@ class DeepSnakeGame:
     def get_observation(self):
         snake_vision_forbidden = self.get_snake_vision(
             2, GameEntity.FORBIDDEN.value)
-        snake_direction = self.get_snake_direction()        
+        snake_direction = self.get_snake_direction()
 
         return np.concatenate([
             snake_vision_forbidden,

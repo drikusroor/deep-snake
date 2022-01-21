@@ -1,4 +1,5 @@
 import numpy as np
+from enums.action import Action
 
 from enums.direction import *
 from constants import *
@@ -76,6 +77,26 @@ class Snake():
             normalized_coordinates.append(
                 [segment[0] / (ROWS_AMOUNT - 1), segment[1] / (COLS_AMOUNT - 1)])
         return np.array(normalized_coordinates)
+
+    def turn(self, action: Action) -> Direction:
+        if action == Action.LEFT:
+            if self.direction_state == Direction.UP:
+                return Direction.LEFT
+            elif self.direction_state == Direction.LEFT:
+                return Direction.DOWN
+            elif self.direction_state == Direction.DOWN:
+                return Direction.RIGHT
+            else:
+                return Direction.UP
+        else:
+            if self.direction_state == Direction.UP:
+                return Direction.RIGHT
+            elif self.direction_state == Direction.LEFT:
+                return Direction.UP
+            elif self.direction_state == Direction.DOWN:
+                return Direction.LEFT
+            else:
+                return Direction.DOWN
 
     def clear_state(self):
         self.state = []

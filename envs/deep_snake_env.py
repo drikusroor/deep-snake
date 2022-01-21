@@ -6,7 +6,7 @@ from game import *
 class DeepSnakeEnv(Env):
 
     def __init__(self):
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(3)
         self.observation_space = spaces.Box(
             low=-1, high=2, shape=(ROWS_AMOUNT, COLS_AMOUNT), dtype=np.uint8)
         self.game = DeepSnakeGame()

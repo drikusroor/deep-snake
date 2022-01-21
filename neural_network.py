@@ -42,12 +42,11 @@ class NeuralNetwork:
         model.add(layers.Dense(observation_shape,
                   input_shape=(observation_shape,), activation="relu"))
         # add a relu layer
-        model.add(layers.Dense(observation_shape, activation="relu"))
         model.add(layers.Dense(observation_shape * 2, activation="relu"))
 
         # output shape is according to the number of action
         # The softmax function outputs a probability distribution over the actions
-        model.add(layers.Dense(4, activation="softmax"))
+        model.add(layers.Dense(3, activation="softmax"))
         model.compile(loss="categorical_crossentropy",
                       optimizer=optimizers.Adam(lr=self.learning_rate))
 
