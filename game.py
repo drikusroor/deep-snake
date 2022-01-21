@@ -43,9 +43,6 @@ class DeepSnakeGame:
     def reset_state(self):
         self.state = self.generate_empty_state()
 
-    def start(self):
-        pass
-
     def step(self, action):
         move_possible = True
         reward = 0
@@ -102,7 +99,7 @@ class DeepSnakeGame:
                 self.snake.state.pop()
 
         else:
-            reward -= 2
+            reward -= 1
             done = True
 
         self.state = self.generate_state()
@@ -161,12 +158,12 @@ class DeepSnakeGame:
 
     def get_observation(self):
         snake_vision_forbidden = self.get_snake_vision(
-            1, GameEntity.FORBIDDEN.value)
-        snake_vision_candy = self.get_snake_vision(1, GameEntity.CANDY.value)
+            2, GameEntity.FORBIDDEN.value)
+        snake_direction = self.get_snake_direction()        
 
         return np.concatenate([
             snake_vision_forbidden,
-            snake_vision_candy,
+            snake_direction
         ])
 
     def get_snake_vision(self, vision_size=3, game_entity=GameEntity.FORBIDDEN.value):
@@ -188,6 +185,14 @@ class DeepSnakeGame:
         vision = np.array(vision)
 
         return vision
+
+    def get_snake_direction(self):
+        return np.array([
+            1 if self.snake.direction_state == Direction.UP else 0,
+            1 if self.snake.direction_state == Direction.RIGHT else 0,
+            1 if self.snake.direction_state == Direction.DOWN else 0,
+            1 if self.snake.direction_state == Direction.LEFT else 0,
+        ])
 
     def close(self):
         pygame.quit()

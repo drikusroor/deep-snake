@@ -4,7 +4,6 @@ from enums.direction import *
 from constants import *
 from enums.game_entity import GameEntity
 
-
 class Snake():
 
     state = []
