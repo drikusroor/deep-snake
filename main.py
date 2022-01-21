@@ -24,9 +24,9 @@ env.seed(RANDOM_SEED)
 
 env.reset()  # reset to env
 
-model_name = 'trained_models/model.v8.h5'
+model_name = 'trained_models/model.v11.h5'
 
-neural_network = NeuralNetwork(env)  # import model
+neural_network = NeuralNetwork(env, model_name)  # import model
 
 neural_network.train(episodes=N_EPISODES)  # train model
 if should_train:
