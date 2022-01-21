@@ -165,27 +165,6 @@ class DeepSnakeGame:
             snake_direction
         ])
 
-    # deprecated
-    def get_snake_vision(self, vision_size=5, game_entity=GameEntity.FORBIDDEN.value):
-        snake_head_state = np.array(self.snake.state[0])
-        vision = []
-        for s_y in range(-vision_size, vision_size + 1):
-            for s_x in range(-vision_size, vision_size + 1):
-                y = np.clip([snake_head_state[1] + s_y], 0, ROWS_AMOUNT - 1)
-                x = np.clip([snake_head_state[0] + s_x], 0, COLS_AMOUNT - 1)
-
-                point = 0
-
-                if self.state[y, x] == game_entity:
-                    point = 1
-
-                if s_y != 0 or s_x != 0:
-                    vision.append(point)
-
-        vision = np.array(vision)
-
-        return vision
-
     def get_proximities_to_type(self, game_entity=GameEntity.FORBIDDEN.value):
         snake_direction = self.snake.direction_state
 
