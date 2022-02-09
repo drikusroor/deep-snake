@@ -11,7 +11,7 @@ from envs.deep_snake_env import DeepSnakeEnv
 
 args = sys.argv
 
-should_train = True
+should_train = False
 should_plot = True
 
 # random seed (reproduciblity)
