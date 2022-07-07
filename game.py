@@ -12,7 +12,6 @@ from models.snake import Snake
 
 
 class DeepSnakeGame:
-
     screen = None
     running = False
     state = []

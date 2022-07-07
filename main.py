@@ -11,8 +11,8 @@ from envs.deep_snake_env import DeepSnakeEnv
 
 args = sys.argv
 
-should_train = False
-should_plot = True
+should_train = SHOULD_TRAIN
+should_plot = SHOULD_PLOT
 
 # random seed (reproduciblity)
 np.random.seed(RANDOM_SEED)
@@ -24,7 +24,7 @@ env.seed(RANDOM_SEED)
 
 env.reset()  # reset to env
 
-model_name = 'trained_models/model.v11.h5'
+model_name = f'trained_models/{TRAIN_MODEL}'
 
 neural_network = NeuralNetwork(env, model_name)  # import model
 
