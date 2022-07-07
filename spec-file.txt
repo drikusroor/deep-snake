@@ -1,0 +1,5 @@
+numpy
+tensorflow
+sklearn
+matplotlib
+gym

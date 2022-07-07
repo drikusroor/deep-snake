@@ -10,12 +10,16 @@ A snake game made in Pygame 2 that will be used to train a neural network AI tha
 - Pygame 2 ( `pip install pygame==2.0.0` )
 - Numpy (`pip install numpy`)
 - Tensorflow
+- Sklearn
+- Matplotlib
 - OpenAI Gym (`pip install gym`)
 
 ### Mac M1
+
 For Mac M1, follow [these instructions](https://mobiarch.wordpress.com/2021/09/24/installing-tensorflow-in-macos-m1-chip/)
 
 Or, in short:
+
 ```sh
 brew install miniforge
 conda init zsh
