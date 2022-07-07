@@ -43,6 +43,8 @@ class NeuralNetwork:
                   input_shape=(observation_shape,), activation="relu"))
         # add a relu layer
         model.add(layers.Dense(observation_shape * 2, activation="relu"))
+        model.add(layers.Dense(observation_shape * 2, activation="relu"))
+        model.add(layers.Dense(observation_shape * 2, activation="relu"))
 
         # output shape is according to the number of action
         # The softmax function outputs a probability distribution over the actions
@@ -168,7 +170,7 @@ class NeuralNetwork:
                     if episode % rollout_n == 0:
                         print('Episode: %d, Reward: %d, Steps: %d' %
                               (episode, episode_reward, steps))
-                        # history = self.update_policy()
+                        history = self.update_policy()
 
             total_rewards[episode] = episode_reward
             total_steps[episode] = steps
